@@ -1,0 +1,10 @@
+{
+  "project": "local-ai-operator",
+  "llm_model": "gemma4:e2b",
+  "modules": {
+    "agent": ["planner","router"],
+    "tools": ["excel","doc","report"],
+    "utils": ["llm_client","stats_engine"],
+    "ui": ["streamlit_app"]
+  }
+}

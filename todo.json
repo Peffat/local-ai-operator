@@ -1,0 +1,22 @@
+{
+  "phase_1_setup": {
+    "tasks": ["environment setup","run streamlit"],
+    "status": "pending"
+  },
+  "phase_2_core": {
+    "tasks": ["excel analysis","pdf reader","ocr support"],
+    "status": "pending"
+  },
+  "phase_3_ai": {
+    "tasks": ["ollama integration","gemma3 usage","response formatting"],
+    "status": "pending"
+  },
+  "phase_4_agent": {
+    "tasks": ["task planner","scheduler","suggestions"],
+    "status": "pending"
+  },
+  "phase_5_demo": {
+    "tasks": ["ui polish","demo scenario","video"],
+    "status": "pending"
+  }
+}
