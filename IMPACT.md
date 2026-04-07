@@ -372,7 +372,7 @@ Month 2: 25% increase in profitability
 
 **Together, we can bridge the digital divide and bring AI to everyone.**
 
-[← Architecture](ARCHITECTURE.md) • [Back to Project](PROJECT.md)
+[← Architecture](ARCHITECTURE.md) • [Back to README](README.md)
 
 ---
 
