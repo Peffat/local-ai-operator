@@ -3,8 +3,8 @@ pandas
 python-docx
 PyPDF2
 pillow
-pytesseract
 pdf2image
+pypdfium2
 requests
 openpyxl
 matplotlib

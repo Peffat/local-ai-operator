@@ -39,18 +39,12 @@ def describe_file_context(file_path, file_info):
             note += " It also appears to be a longer document that may need summarization."
         return f"{note}\nExtracted text snippet:\n{snippet}"
 
-    if ftype == "pdf_ocr":
-        snippet = file_info.get("content", "").strip()
-        snippet = snippet[:1500].strip()
-        questions = len(re.findall(r"\?", snippet))
-        note = "This PDF appears to be a scanned document or image-based PDF. OCR text has been extracted."
-        if file_info.get("language"):
-            note += f" Detected language: {file_info.get('language')}."
-        if questions >= 2:
-            note += " It appears to include questions or prompts."
-        if len(snippet) > 800:
-            note += " It also appears to be a longer document that may need summarization."
-        return f"{note}\nOCR extracted text snippet:\n{snippet}"
+    if ftype == "pdf_image":
+        note = (
+            "This PDF appears to be image-based (scanned pages). "
+            "Use vision analysis directly on the page images, including transcribing any readable text if present."
+        )
+        return note
 
     if ftype == "docx":
         snippet = file_info.get("content", "").strip()[:1500]
@@ -68,15 +62,12 @@ def describe_file_context(file_path, file_info):
         sample = file_info.get("content", "").strip()
         return f"{note}\nSample rows:\n{sample}"
 
-    if ftype == "image_text":
-        snippet = file_info.get("content", "").strip()[:1500]
-        note = "This image appears to contain readable text extracted by OCR."
-        if len(snippet) > 300:
-            note += " The text may need transcription, summarization, or question answering."
-        return f"{note}\nExtracted text snippet:\n{snippet}"
-
     if ftype == "image":
-        return "This image appears to contain visual content without readable text. Describe what you want me to do next, such as identify the object, explain the scene, or answer a question about it."
+        return (
+            "This image should be analyzed with the vision model directly. "
+            "If text is visible, transcribe and interpret it. "
+            "Also describe relevant visual elements and answer the user's request."
+        )
 
     return "The file was processed, but its type could not be clearly identified."
 
@@ -164,7 +155,8 @@ You should:
         follow_up = (
             "After describing the file, ask the user what they want next. "
             "For example, should the content be summarized, questions answered, text extracted, "
-            "translated, or data extracted? If the document contains questions, mention that. "
+            "translated, or data extracted? If this is an image-based PDF or image, use vision to read visible text directly. "
+            "If the document contains questions, mention that. "
             "If it is long, mention summarization as an option."
         )
 
@@ -178,7 +170,7 @@ You should:
             response = generate(prompt, model=model, image_paths=image_paths)
         elif image_bytes_list:
             response = generate(prompt, model=model, image_bytes_list=image_bytes_list)
-        elif file_info.get("status") == "success" and file_info.get("type") in {"image", "image_text"}:
+        elif file_info.get("status") == "success" and file_info.get("type") in {"image"}:
             response = generate(prompt, model=model, image_path=file_path)
         else:
             response = generate(prompt, model=model)

@@ -1,11 +1,15 @@
 import PyPDF2
-import pytesseract
-from PIL import Image, ImageOps
+from PIL import Image
 import docx
 import pandas as pd
 from pdf2image import convert_from_path
 import re
 import io
+
+try:
+    import pypdfium2 as pdfium
+except Exception:
+    pdfium = None
 
 
 def read_pdf(file_path: str) -> str:
@@ -19,24 +23,31 @@ def read_pdf(file_path: str) -> str:
     return text.strip()
 
 
-def ocr_image(img: Image.Image) -> str:
-    text = pytesseract.image_to_string(img, lang="eng", config="--psm 6")
-    if not text.strip():
-        gray = ImageOps.grayscale(img)
-        text = pytesseract.image_to_string(gray, lang="eng", config="--psm 6")
-    return text.strip()
-
-
-def ocr_pdf(file_path: str, max_pages: int = 2) -> str:
-    text = ""
+def pdf_contains_images(file_path: str) -> bool:
+    """
+    Detect whether a PDF contains embedded image objects.
+    """
     try:
-        pages = convert_from_path(file_path, dpi=200, first_page=1, last_page=max_pages)
-        for page in pages:
-            page_text = ocr_image(page)
-            text += page_text + "\n"
+        with open(file_path, "rb") as file:
+            reader = PyPDF2.PdfReader(file)
+            for page in reader.pages:
+                resources = page.get("/Resources")
+                if not resources:
+                    continue
+
+                xobject = resources.get("/XObject") if hasattr(resources, "get") else None
+                if not xobject:
+                    continue
+
+                xobject = xobject.get_object()
+                for obj in xobject.values():
+                    resolved = obj.get_object()
+                    if resolved.get("/Subtype") == "/Image":
+                        return True
     except Exception:
-        return ""
-    return text.strip()
+        return False
+
+    return False
 
 
 def detect_language(text: str) -> str:
@@ -89,58 +100,94 @@ def detect_language(text: str) -> str:
         return "unknown"
 
 
-def should_fallback_to_ocr(text: str) -> bool:
-    if not text or not text.strip():
-        return True
-
-    normalized = text.strip().lower()
-    words = re.findall(r"\w+", normalized)
-    if not words:
-        return True
-
-    scanner_signatures = [
-        "camscanner",
-        "scanned by",
-        "document scanner",
-        "page 1",
-        "page 2",
-        "share via",
-    ]
-
-    # If the extracted text is still very short, it may be a scanned document or metadata-only PDF.
-    if len(words) < 20:
-        if any(sig in normalized for sig in scanner_signatures):
-            return True
-        if re.search(r"[.!?]", normalized) and len(set(words)) >= 3:
-            return False
-        return True
-
-    if any(sig in normalized for sig in scanner_signatures) and len(words) <= 40:
-        return True
-
-    unique = set(words)
-    if len(unique) <= max(4, len(words) // 10) and len(words) < 60:
-        return True
-
-    return False
-
-
 def read_docx(file_path: str) -> str:
     doc = docx.Document(file_path)
     return "\n".join([p.text for p in doc.paragraphs])
 
 
-def extract_pdf_images_as_bytes(file_path: str, max_pages: int = 2) -> list[bytes]:
+def extract_pdf_pages_as_images(file_path: str, max_pages: int | None = None) -> list[bytes]:
+    """
+    Convert PDF pages to PNG bytes for vision analysis.
+
+    Strategy:
+    - Try high DPI first (300), then lower fallback DPIs for problematic files.
+    - Convert page-by-page to reduce memory pressure on large PDFs.
+    - Try with and without pdftocairo backend for compatibility.
+    """
     images = []
+
     try:
-        pages = convert_from_path(file_path, dpi=300, first_page=1, last_page=max_pages)
-        for page in pages:
-            buffer = io.BytesIO()
-            page.save(buffer, format="PNG")
-            images.append(buffer.getvalue())
+        with open(file_path, "rb") as f:
+            page_count = len(PyPDF2.PdfReader(f).pages)
     except Exception:
-        pass
-    return images
+        page_count = 0
+
+    if page_count == 0:
+        return images
+
+    last_page = min(page_count, max_pages) if max_pages is not None else page_count
+
+    dpis = [300, 220, 150]
+
+    # Strategy 1 (preferred): pypdfium2 (Poppler-free)
+    if pdfium is not None:
+        for dpi in dpis:
+            try:
+                doc = pdfium.PdfDocument(file_path)
+                images = []
+                for page_idx in range(last_page):
+                    page = doc[page_idx]
+                    bitmap = page.render(scale=dpi / 72)
+                    pil_image = bitmap.to_pil()
+                    buffer = io.BytesIO()
+                    pil_image.save(buffer, format="PNG")
+                    images.append(buffer.getvalue())
+
+                if images:
+                    return images
+            except Exception:
+                continue
+
+    # Strategy 2: pdf2image + poppler (if available)
+    backends = [True, False]  # use_pdftocairo
+
+    for dpi in dpis:
+        images = []
+        converted_count = 0
+
+        for page_num in range(1, last_page + 1):
+            page_done = False
+
+            for use_cairo in backends:
+                try:
+                    page_images = convert_from_path(
+                        file_path,
+                        dpi=dpi,
+                        first_page=page_num,
+                        last_page=page_num,
+                        fmt="png",
+                        use_pdftocairo=use_cairo,
+                    )
+
+                    if not page_images:
+                        continue
+
+                    buffer = io.BytesIO()
+                    page_images[0].save(buffer, format="PNG")
+                    images.append(buffer.getvalue())
+                    converted_count += 1
+                    page_done = True
+                    break
+                except Exception:
+                    continue
+
+            if not page_done:
+                continue
+
+        if converted_count > 0 and images:
+            return images
+
+    return []
 
 
 def read_spreadsheet(file_path: str) -> dict:
@@ -173,22 +220,15 @@ def read_spreadsheet(file_path: str) -> dict:
 
 def process_image(file_path: str) -> dict:
     try:
-        img = Image.open(file_path)
-        text = ocr_image(img)
+        # Validate that the image is readable, but do not run OCR.
+        with Image.open(file_path) as img:
+            img.verify()
 
-        if text.strip():
-            return {
-                "status": "success",
-                "type": "image_text",
-                "content": text,
-                "language": detect_language(text)
-            }
-        else:
-            return {
-                "status": "success",
-                "type": "image",
-                "message": "No readable text found. Please describe the image."
-            }
+        return {
+            "status": "success",
+            "type": "image",
+            "content": "Image loaded successfully. Vision model can analyze visual content and text directly from the image."
+        }
 
     except Exception as e:
         return {
@@ -199,48 +239,28 @@ def process_image(file_path: str) -> dict:
 
 def process_document(file_path: str) -> dict:
     try:
-        if file_path.lower().endswith(".pdf"):
-            text = read_pdf(file_path)
-            if text.strip():
-                return {
-                    "status": "success",
-                    "type": "pdf",
-                    "content": text,
-                    "language": detect_language(text)
-                }
+        lower_path = file_path.lower()
 
-            image_bytes_list = extract_pdf_images_as_bytes(file_path)
+        if lower_path.endswith(".pdf"):
+            image_bytes_list = extract_pdf_pages_as_images(file_path)
             if image_bytes_list:
-                combined_text = ""
-                for image_bytes in image_bytes_list:
-                    image = Image.open(io.BytesIO(image_bytes))
-                    combined_text += ocr_image(image) + "\n"
-
-                if combined_text.strip():
-                    return {
-                        "status": "success",
-                        "type": "pdf_ocr",
-                        "content": combined_text.strip(),
-                        "language": detect_language(combined_text),
-                        "image_bytes_list": image_bytes_list
-                    }
-
                 return {
                     "status": "success",
                     "type": "pdf_image",
-                    "content": "This PDF appears to contain image-based pages. No selectable text was extracted.",
+                    "content": "PDF pages were converted to high-DPI images (300 DPI) for direct Gemma Vision analysis.",
                     "language": "unknown",
                     "image_bytes_list": image_bytes_list
                 }
 
             return {
-                "status": "success",
-                "type": "pdf",
-                "content": "",
-                "language": "unknown"
+                "status": "error",
+                "message": (
+                    "Unable to convert PDF pages to images for vision analysis. "
+                    "No page image could be rendered. Please check poppler/pdf rendering support."
+                )
             }
 
-        elif file_path.endswith(".docx"):
+        elif lower_path.endswith(".docx"):
             text = read_docx(file_path)
             return {
                 "status": "success",
@@ -249,9 +269,9 @@ def process_document(file_path: str) -> dict:
                 "language": detect_language(text)
             }
 
-        elif file_path.endswith((".png", ".jpg", ".jpeg")):
+        elif lower_path.endswith((".png", ".jpg", ".jpeg", ".bmp", ".webp", ".tif", ".tiff")):
             return process_image(file_path)
-        elif file_path.endswith(('.csv', '.xlsx', '.xls')):
+        elif lower_path.endswith(('.csv', '.xlsx', '.xls')):
             return read_spreadsheet(file_path)
         else:
             return {
