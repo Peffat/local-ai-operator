@@ -39,13 +39,13 @@ st.sidebar.header("⚙️ Controls")
 
 mode = st.sidebar.selectbox(
     "Mode",
-    ["General Assistant", "Health Assistant", "Agri Advisor", "Smart Tools"]
+    ["General Assistant", "Data Analysis", "Health Assistant", "Agri Advisor"]
 )
 
-if mode == "Smart Tools":
+if mode == "Data Analysis":
     task_options = [
         "Auto (AI decides)",
-        "Excel Analysis (PDF report)",
+        "Data Analysis (PDF report)",
         "Document/Image Analysis"
     ]
 else:
@@ -126,10 +126,20 @@ for msg in st.session_state.chat_history:
 # =========================
 user_input = st.chat_input("Ask something...")
 
-if user_input:
+status_area = st.empty()
+progress_bar = st.progress(0)
 
-    response = ""
-    result = {}
+if "last_result" not in st.session_state:
+    st.session_state.last_result = None
+if "last_response" not in st.session_state:
+    st.session_state.last_response = ""
+if "last_user_input" not in st.session_state:
+    st.session_state.last_user_input = ""
+
+response = ""
+result = {}
+
+if user_input:
 
     st.session_state.chat_history.append({
         "role": "user",
@@ -141,24 +151,41 @@ if user_input:
 
     file_path = st.session_state.file_path
 
+    def progress_callback(message, percent=None):
+        if percent is not None:
+            progress_bar.progress(min(max(int(percent), 0), 100))
+        status_area.info(message)
+
     try:
         # =========================
         # EXCEL
         # =========================
-        if mode == "Smart Tools" and function == "Excel Analysis (PDF report)" and file_path:
+        if mode == "Data Analysis" and function == "Data Analysis (PDF report)" and file_path:
 
-            result = analyze_excel_with_ai(
-                file_path,
-                model=MODEL,
-                mode=mode,
-                chart_type=chart_type,
-                user_input=user_input
-            )
+            with st.spinner("Running data analysis..."):
+                result = analyze_excel_with_ai(
+                    file_path,
+                    model=MODEL,
+                    mode=mode,
+                    chart_type=chart_type,
+                    user_input=user_input,
+                    progress_callback=progress_callback
+                )
 
-            response = result.get("insights", "No insights generated.")
+            if result.get("status") == "error":
+                response = f"⚠️ Error: {result.get('message', 'Analysis failed without details')}"
+                status_area.error(response)
+                progress_bar.progress(0)
+            else:
+                response = result.get("insights") or "No insights generated."
+                status_area.success("Data analysis complete. Your report is ready for download.")
+                progress_bar.progress(100)
+
+            report_mode = True
 
         else:
-            if file_path and file_path.lower().endswith((".png", ".jpg", ".jpeg")):
+            report_mode = False
+            if file_path and file_path.lower().endswith((".png", ".jpg", ".jpeg", ".pdf", ".docx", ".xlsx", ".xls", ".csv")):
                 intent = "document_analysis"
             else:
                 plan = detect_intent(user_input)
@@ -178,38 +205,53 @@ if user_input:
     except Exception as e:
         response = f"⚠️ Error: {str(e)}"
 
+    st.session_state.last_result = result
+    st.session_state.last_response = response
+    st.session_state.last_user_input = user_input
+
     # =========================
     # SAVE CHAT
     # =========================
-    st.session_state.chat_history.append({
-        "role": "assistant",
-        "content": response
-    })
+    if not (mode == "Data Analysis" and function == "Data Analysis (PDF report)" and file_path):
+        st.session_state.chat_history.append({
+            "role": "assistant",
+            "content": response
+        })
 
-    with st.chat_message("assistant"):
-        st.markdown(response)
+    if not (mode == "Data Analysis" and function == "Data Analysis (PDF report)" and file_path):
+        with st.chat_message("assistant"):
+            st.markdown(response.replace("\n", "  \n"))
 
-        # 📄 REPORT PREVIEW + DOWNLOAD
-        if result.get("report"):
-            preview_text = response.split("\n")[:3]
-            if preview_text:
-                st.markdown("**Report preview:**")
-                for line in preview_text:
-                    if line.strip():
-                        st.markdown(line)
+# Persist downloads and report preview after reruns
+display_result = result if result else st.session_state.last_result
+display_response = response if response else st.session_state.last_response
 
-            with open(result["report"], "rb") as f:
-                st.download_button(
-                    "📥 Download Report",
-                    f,
-                    os.path.basename(result["report"])
-                )
+if (mode == "Data Analysis" and function == "Data Analysis (PDF report)") and display_result and (display_result.get("report") or display_result.get("cleaned_file")):
+    st.markdown("**Downloads:**")
+    col1, col2 = st.columns(2)
 
-        # 📊 CLEAN DATA DOWNLOAD
-        if result.get("cleaned_file"):
-            with open(result["cleaned_file"], "rb") as f:
-                st.download_button(
-                    "📥 Download Cleaned Data",
-                    f,
-                    os.path.basename(result["cleaned_file"])
-                )
+    if display_result.get("report"):
+        with open(display_result["report"], "rb") as f:
+            report_data = f.read()
+        col1.download_button(
+            "📥 Download Report",
+            report_data,
+            os.path.basename(display_result["report"]),
+            key="download_report"
+        )
+
+    if display_result.get("cleaned_file"):
+        with open(display_result["cleaned_file"], "rb") as f:
+            cleaned_data = f.read()
+        col2.download_button(
+            "📥 Download Cleaned Data",
+            cleaned_data,
+            os.path.basename(display_result["cleaned_file"]),
+            key="download_cleaned"
+        )
+
+    if display_result.get("report"):
+        preview_text = "\n".join(display_response.split("\n")[:8]).strip()
+        if preview_text:
+            st.markdown("**Report preview:**")
+            st.text(preview_text)
