@@ -60,7 +60,7 @@ Includes:
 
 * Executive Summary
 * Data Quality Dashboard
-* Visual charts (heatmaps, histograms, boxplots)
+* Visual charts 
 * Recommendations
 
 ---
@@ -68,6 +68,8 @@ Includes:
 ## 🖼️ Image Analysis (NO OCR)
 
 * Direct image understanding with Gemma 4
+* PDF pages are rendered as full-page images (300 DPI) and analyzed by Gemma Vision
+* Poppler-free PDF rendering fallback via `pypdfium2` for better Windows compatibility
 * Works for:
 
   * injuries
@@ -124,6 +126,7 @@ This system enables:
 * Streamlit
 * Ollama
 * Gemma 4
+* pypdfium2 (PDF page rendering fallback)
 * Pandas
 * Seaborn / Matplotlib
 * ReportLab

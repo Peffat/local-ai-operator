@@ -9,7 +9,7 @@
 
 *From beginner to expert - unlock the full potential of offline AI*
 
-[← Installation](INSTALLATION.md) • [Back to Project](PROJECT.md) • [Next: Architecture →](ARCHITECTURE.md)
+[← Installation](INSTALLATION.md) • [Back to Project](README.md) • [Next: Architecture →](ARCHITECTURE.md)
 
 </div>
 
@@ -18,9 +18,9 @@
 ## 🚀 **Getting Started**
 
 ### **First Launch**
-1. **Start Ollama**: `ollama run gemma4`
+1. **Start Ollama**: `ollama run gemma4:e2b`
 2. **Launch App**: `streamlit run app.py`
-3. **Select Mode**: Choose from sidebar (General, Health, Agriculture, Smart Tools)
+3. **Select Mode**: Choose from sidebar (General Assistant, Data Analysis, Health Assistant, Agri Advisor)
 4. **Start Chatting**: Type your first message!
 
 ---
@@ -78,7 +78,7 @@ AI: "Signs of nitrogen deficiency. Recommend balanced fertilizer application and
 
 ---
 
-### 🛠️ **Smart Tools Mode**
+### 🛠️ **Data Analysis Mode**
 *Best for: Data analysis, document processing, specialized tasks*
 
 **Available Tools:**
@@ -194,7 +194,7 @@ Output:
 
 ### **PDF Analysis**
 ```
-Upload PDF → AI extraction → Smart summarization
+Upload PDF → Pages rendered as images → Gemma Vision analysis
 ├── Content understanding
 ├── Key points identification
 ├── Structure recognition
@@ -257,7 +257,7 @@ AI: Provides data-driven insights with explanations
 
 ### **Chart Type Selection**
 ```
-Smart Tools → Excel Analysis → Chart Type dropdown
+Data Analysis → Excel Analysis → Chart Type dropdown
 ├── Auto (AI chooses best)
 ├── Histogram (distributions)
 ├── Boxplot (outliers)
@@ -267,7 +267,7 @@ Smart Tools → Excel Analysis → Chart Type dropdown
 ### **Mode Switching**
 ```
 Start in General → Switch to Health for medical questions
-Start in Agriculture → Switch to Smart Tools for data analysis
+Start in Agriculture → Switch to Data Analysis for data workflows
 AI remembers context across mode switches
 ```
 
@@ -275,7 +275,7 @@ AI remembers context across mode switches
 ```
 ✅ Excel (.xlsx, .xls)
 ✅ CSV (comma/tab separated)
-✅ PDF (text-based documents)
+✅ PDF (text-based and scanned/image-based; analyzed as full-page vision inputs)
 ✅ Images (.png, .jpg, .jpeg)
 ✅ Word (.docx)
 ```
@@ -448,11 +448,10 @@ Result: Data-driven decisions on limited budget
 
 *From simple questions to complex data analysis - you're equipped for anything.*
 
-[← Installation](INSTALLATION.md) • [Back to Project](PROJECT.md) • [Next: Architecture →](ARCHITECTURE.md)
+[← Installation](INSTALLATION.md) • [Back to Project](README.md) • [Next: Architecture →](ARCHITECTURE.md)
 
 ---
 
 *Built for the Gemma 4 Good Hackathon - Digital Equity Track*
 
-</div></content>
-<parameter name="filePath">d:\My Local Projects\local-ai-operator\USAGE.md
+</div>

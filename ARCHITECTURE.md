@@ -9,7 +9,7 @@
 
 *Enterprise-grade AI system in a lightweight, offline package*
 
-[← Usage Guide](USAGE.md) • [Back to Project](PROJECT.md) • [Next: Impact →](IMPACT.md)
+[← Usage Guide](USAGE.md) • [Back to Project](README.md) • [Next: Impact →](IMPACT.md)
 
 </div>
 
@@ -64,7 +64,7 @@
 ```
 ✅ Text understanding (Gemma 4)
 ✅ Visual analysis (Gemma Vision)
-✅ Document processing (PDF/DOCX)
+✅ Document processing (PDF pages rendered to images for vision + DOCX text extraction)
 ✅ Data intelligence (Excel/CSV)
 ```
 
@@ -116,8 +116,10 @@
 ```python
 # tools/ - Specialized processing modules
 ├── excel_tool.py     # Data analysis & reporting
-├── doc_tool.py       # Document processing
+├── doc_tool.py       # Document/image processing (vision-first PDF pipeline)
 ├── report_tool.py    # PDF generation
+
+# utils/ - Shared infrastructure
 └── stats_engine.py   # Statistical computations
 ```
 
@@ -413,11 +415,10 @@ Memory & context      |  Stateless
 
 *This architecture powers the future of accessible, private, and intelligent AI.*
 
-[← Usage Guide](USAGE.md) • [Back to Project](PROJECT.md) • [Next: Impact →](IMPACT.md)
+[← Usage Guide](USAGE.md) • [Back to Project](README.md) • [Next: Impact →](IMPACT.md)
 
 ---
 
 *Built for the Gemma 4 Good Hackathon - Technical Innovation Award*
 
-</div></content>
-<parameter name="filePath">d:\My Local Projects\local-ai-operator\ARCHITECTURE.md
+</div>

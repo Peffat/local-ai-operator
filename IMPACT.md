@@ -9,7 +9,7 @@
 
 *AI for everyone, everywhere - breaking down digital barriers*
 
-[← Architecture](ARCHITECTURE.md) • [Back to Project](PROJECT.md)
+[← Architecture](ARCHITECTURE.md) • [Back to Project](README.md)
 
 </div>
 
@@ -380,5 +380,4 @@ Month 2: 25% increase in profitability
 
 *Winner of the Ollama Local Execution Bonus Award*
 
-</div></content>
-<parameter name="filePath">d:\My Local Projects\local-ai-operator\IMPACT.md
+</div>

@@ -1,10 +1,45 @@
 {
   "project": "local-ai-operator",
   "llm_model": "gemma4:e2b",
+  "runtime": {
+    "ui": "Streamlit",
+    "llm_runtime": "Ollama",
+    "offline_first": true,
+    "vision_pdf_pipeline": {
+      "enabled": true,
+      "strategy": "full_page_image_rendering",
+      "primary_renderer": "pypdfium2",
+      "secondary_renderer": "pdf2image"
+    }
+  },
+  "entrypoints": {
+    "app": "app.py",
+    "router": "agent/router.py",
+    "planner": "agent/planner.py"
+  },
   "modules": {
-    "agent": ["planner","router"],
-    "tools": ["excel","doc","report"],
-    "utils": ["llm_client","stats_engine"],
-    "ui": ["streamlit_app"]
-  }
+    "agent": [
+      "planner",
+      "router"
+    ],
+    "tools": [
+      "excel_tool",
+      "doc_tool",
+      "report_tool"
+    ],
+    "utils": [
+      "llm_client",
+      "stats_engine"
+    ]
+  },
+  "supported_upload_types": [
+    ".xlsx",
+    ".xls",
+    ".csv",
+    ".pdf",
+    ".docx",
+    ".png",
+    ".jpg",
+    ".jpeg"
+  ]
 }
