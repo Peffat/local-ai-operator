@@ -54,6 +54,30 @@ else:
 function = st.sidebar.selectbox("Task", task_options)
 
 # =========================
+# DISCLAIMERS
+# =========================
+if mode == "Health Assistant":
+    st.warning(
+        "**Medical Disclaimer**: AI analysis is NOT a substitute for professional medical advice. "
+        "Always verify any health-related insights with a licensed healthcare provider before taking action. "
+        "For emergencies, contact medical professionals immediately.",
+        icon="⚠️"
+    )
+elif mode == "Agri Advisor":
+    st.warning(
+        "**Agricultural Disclaimer**: These recommendations are AI-generated insights only. "
+        "Consult with agricultural experts or local specialists before implementing any practices. "
+        "Results vary by region, climate, and soil conditions.",
+        icon="🌾"
+    )
+else:
+    st.info(
+        "**General Advisory**: AI responses should always be verified independently. "
+        "Do not rely solely on this system for critical decisions.",
+        icon="ℹ️"
+    )
+
+# =========================
 # RESET LOGIC
 # =========================
 if st.session_state.last_mode != mode or st.session_state.last_task != function:
@@ -67,12 +91,6 @@ if st.session_state.last_mode != mode or st.session_state.last_task != function:
 # CHART TYPE
 # =========================
 chart_type = "auto"
-
-if mode == "Smart Tools" and function == "Excel Analysis (PDF report)":
-    chart_type = st.sidebar.selectbox(
-        "Chart Type",
-        ["auto", "histogram", "boxplot", "heatmap"]
-    )
 
 # =========================
 # FILE UPLOAD
