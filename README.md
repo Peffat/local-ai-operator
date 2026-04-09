@@ -174,7 +174,6 @@ streamlit run app.py
 * 🎯 Usage → USAGE.md
 * 🏗 Architecture → ARCHITECTURE.md
 * 🌍 Impact → IMPACT.md
-* 🏆 Premium Upgrades → PREMIUM_UPGRADES.md
 
 ---
 
