@@ -13,10 +13,18 @@ An **offline-first, multimodal AI system** that brings powerful intelligence to 
 
 # 🎥 Demo
 
-[![Watch the video](https://img.youtube.com/vi/IIggJse8Btk/0.jpg)](https://www.youtube.com/watch?v=IIggJse8Btk)
+[![Watch the demo](https://img.youtube.com/vi/IIggJse8Btk/hqdefault.jpg)](https://www.youtube.com/watch?v=IIggJse8Btk)
 
 ▶️ Full demo of Local AI Operator (Offline AI system using Gemma 4)
 
+### 🚀 What you’ll see in the demo
+
+- Fully offline AI system (no internet)
+- Image analysis using Gemma Vision
+- Excel → automated report generation
+- Real-world use cases (health, agriculture, business)
+
+💡 Built for the Gemma 4 Good Hackathon – Digital Equity Track
 ---
 
 # 📸 Features Overview
