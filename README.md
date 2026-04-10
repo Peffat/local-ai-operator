@@ -11,9 +11,11 @@ An **offline-first, multimodal AI system** that brings powerful intelligence to 
 
 ---
 
-# 🎥 Demo
+# 🎥 Demo (Click to watch ▶️)
 
-[![Watch the demo](https://img.youtube.com/vi/IIggJse8Btk/hqdefault.jpg)](https://www.youtube.com/watch?v=IIggJse8Btk)
+[![Watch the demo](https://img.youtube.com/vi/IIggJse8Btk/0.jpg)](https://www.youtube.com/watch?v=IIggJse8Btk)
+
+🔗 Opens in YouTube
 
 ▶️ Full demo of Local AI Operator (Offline AI system using Gemma 4)
 
