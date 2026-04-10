@@ -7,6 +7,28 @@ from tools.excel_tool import analyze_excel_with_ai
 
 st.set_page_config(page_title="Local AI Operator", layout="wide")
 
+st.markdown(
+    """
+    <style>
+    .gemma-footer {
+        position: fixed;
+        left: 1rem;
+        bottom: 4.5rem;
+        color: #FFFFFF;
+        background: rgba(17, 24, 39, 0.9);
+        padding: 0.35rem 0.6rem;
+        border-radius: 0.4rem;
+        font-size: 0.85rem;
+        z-index: 999999;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+        pointer-events: none;
+    }
+    </style>
+    <div class="gemma-footer">All powered by Gemma 4</div>
+    """,
+    unsafe_allow_html=True,
+)
+
 MODEL = "gemma4:e2b"
 
 # =========================
