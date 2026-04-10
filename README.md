@@ -28,24 +28,6 @@ An **offline-first, multimodal AI system** that brings powerful intelligence to 
 
 ---
 
-## 🩺 Health Assistant
-
-* Injury analysis from images
-* First aid guidance
-* Risk detection (infection, severity)
-* When to seek medical help
-
----
-
-## 🌾 Agriculture Advisor
-
-* Plant disease detection
-* Nutrient deficiency analysis
-* Pest identification
-* Practical treatment suggestions
-
----
-
 ## 📊 Data Intelligence (Smart Tools)
 
 Upload Excel/CSV → Get:
@@ -78,14 +60,22 @@ Includes:
 
 ---
 
-# 🏗 Architecture
+## 🩺 Health Assistant
 
-User → Planner → Router → Tools → Gemma 4 → Response
+* Injury analysis from images
+* First aid guidance
+* Risk detection (infection, severity)
+* When to seek medical help
 
-* **Planner** → detects intent
-* **Router** → selects tool
-* **Tools** → process data/images/docs
-* **LLM** → reasoning + response
+---
+
+## 🌾 Agriculture Advisor
+
+* Plant disease detection
+* Nutrient deficiency analysis
+* Pest identification
+* Practical treatment suggestions
+
 
 ---
 
